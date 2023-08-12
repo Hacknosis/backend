@@ -1,8 +1,8 @@
 package com.hacknosis.backend.controllers;
 
-import com.hacknosis.backend.models.Patient;
+import com.hacknosis.backend.dto.JwtRequest;
+import com.hacknosis.backend.dto.JwtResponse;
 import com.hacknosis.backend.models.User;
-import com.hacknosis.backend.repositories.UserRepository;
 import com.hacknosis.backend.services.UserService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -13,24 +13,27 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.security.auth.login.AccountNotFoundException;
+import javax.validation.Valid;
 
 @Log4j2
 @RestController
 @AllArgsConstructor
-@RequestMapping("api/user")
+@RequestMapping("api/auth")
 @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 @OpenAPIDefinition(info = @Info(title = "User API", version = "1.0", description = "Web server for user authentication"))
-public class UserController {
-    private UserService userService;
-    @PostMapping("/info_update")
-    public ResponseEntity<String> userInfoUpdate(@RequestBody User user) throws AccountNotFoundException {
-        userService.updateUser(user);
-        return ResponseEntity.ok("User information was updated");
+public class AuthController {
+    private final UserService userService;
+
+    @PostMapping("/login")
+    public ResponseEntity<JwtResponse> login(@RequestBody @Valid JwtRequest authenticationRequest) {
+        String token = userService.authenticate(authenticationRequest);
+        return ResponseEntity.ok(new JwtResponse(token));
     }
-    @PostMapping("/add_patient")
-    public ResponseEntity<String> addPatient(@RequestBody Patient patient, Authentication authentication)
-            throws AccountNotFoundException {
-        userService.addPatient(patient, authentication.getName());
-        return ResponseEntity.ok("New patient has been added");
+
+    @GetMapping("/user_info")
+    public ResponseEntity<User> userInfo(Authentication authentication) throws AccountNotFoundException {
+        return ResponseEntity.ok(userService.getUser(authentication.getName()));
     }
+
+
 }
