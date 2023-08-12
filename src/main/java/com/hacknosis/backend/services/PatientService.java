@@ -1,13 +1,11 @@
 package com.hacknosis.backend.services;
 
 import com.hacknosis.backend.exceptions.ReportProcessingException;
-import com.hacknosis.backend.models.Patient;
-import com.hacknosis.backend.models.ReportType;
-import com.hacknosis.backend.models.TestReport;
-import com.hacknosis.backend.models.User;
+import com.hacknosis.backend.exceptions.ResourceNotFoundException;
+import com.hacknosis.backend.models.*;
+import com.hacknosis.backend.repositories.AppointmentRepository;
 import com.hacknosis.backend.repositories.PatientRepository;
 import com.hacknosis.backend.repositories.TestReportRepository;
-import com.hacknosis.backend.repositories.UserRepository;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -24,7 +22,6 @@ import javax.security.auth.login.AccountNotFoundException;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Base64;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -33,6 +30,7 @@ public class PatientService {
     private PatientRepository patientRepository;
     private UserService userService;
     private TestReportRepository testReportRepository;
+    private AppointmentRepository appointmentRepository;
 
     public void updatePatient(Patient patient) throws AccountNotFoundException {
         if (patientRepository.findById(patient.getId()).isEmpty()) {
@@ -43,6 +41,25 @@ public class PatientService {
             patient.setUser(oldPatient.getUser());
         }
         patientRepository.save(patient);
+    }
+
+    public void upsertAppointment(Appointment appointment, long patientId, String username) throws AccountNotFoundException {
+        if (!userService.usernameExist(username)) {
+            throw new AccountNotFoundException("The authenticated Doctor account does not exist");
+        } else if (!patientRepository.existsById(patientId)) {
+            throw new ResourceNotFoundException(String.format("The patient with id - %d does not exist", patientId));
+        }
+        Patient patient = patientRepository.getReferenceById(patientId);
+        appointment.setPatient(patient);
+        appointmentRepository.save(appointment);
+    }
+    public void deleteAppointment(long appointmentId, String username) throws AccountNotFoundException, ResourceNotFoundException {
+        if (!userService.usernameExist(username)) {
+            throw new AccountNotFoundException("The authenticated Doctor account does not exist");
+        } else if (!appointmentRepository.existsById(appointmentId)) {
+            throw new ResourceNotFoundException(String.format("The appointment with id - %d does not exist", appointmentId));
+        }
+        appointmentRepository.deleteById(appointmentId);
     }
 
     public void processImageReport(MultipartFile imageReport, String username) throws AccountNotFoundException, IOException {

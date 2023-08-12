@@ -32,7 +32,6 @@ import java.util.Arrays;
 @OpenAPIDefinition(info = @Info(title = "User API", version = "1.0", description = "Web server for patient operations"))
 public class PatientController {
     private PatientService patientService;
-
     @PostMapping(value = "/report/image/upload")
     public ResponseEntity<String> uploadImageReport(
             @Parameter(
@@ -58,5 +57,4 @@ public class PatientController {
         patientService.updatePatient(patient);
         return ResponseEntity.ok("Patient information has been updated");
     }
-
 }

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,7 +45,7 @@ public class Patient {
     private List<String> allergies = new ArrayList<>();
 
     @NotNull(message = "Room number cannot be null")
-    long room;
+    private long room;
 
     @NotNull(message = "Resus Status cannot be null")
     @Enumerated(EnumType.STRING)
@@ -54,4 +55,7 @@ public class Patient {
     @ElementCollection
     private Set<Indicator> specialIndicators;
 
+    @NotNull(message = "Appointments cannot be null")
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    private List<Appointment> appointments = new ArrayList<>();
 }
