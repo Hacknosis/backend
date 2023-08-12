@@ -3,6 +3,7 @@ package com.hacknosis.backend.services;
 import com.hacknosis.backend.dto.JwtRequest;
 import com.hacknosis.backend.exceptions.AccountInfoConflictException;
 import com.hacknosis.backend.exceptions.AuthenticationException;
+import com.hacknosis.backend.models.Patient;
 import com.hacknosis.backend.models.User;
 import com.hacknosis.backend.repositories.UserRepository;
 import com.hacknosis.backend.utils.JwtTokenUtil;
@@ -41,5 +42,21 @@ public class UserService {
             throw new AccountNotFoundException(String.format("Account with username %s does not exist", username));
         }
         return userRepository.findUserByUsername(username).get();
+    }
+
+    public void updateUser(User user) throws AccountNotFoundException {
+        if (!usernameExist(user.getUsername())) {
+            throw new AccountNotFoundException(String.format("Account with username %s does not exist", user.getUsername()));
+        }
+        userRepository.save(user);
+    }
+
+    public void addPatient(Patient patient, String username) throws AccountNotFoundException {
+        if (!usernameExist(username)) {
+            throw new AccountNotFoundException(String.format("Account with username %s does not exist", username));
+        }
+        User doctor = userRepository.findUserByUsername(username).get();
+        doctor.getPatients().add(patient);
+        userRepository.save(doctor);
     }
 }
