@@ -19,10 +19,9 @@ import javax.security.auth.login.AccountNotFoundException;
 @AllArgsConstructor
 @RequestMapping("api/user")
 @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
-@OpenAPIDefinition(info = @Info(title = "User API", version = "1.0", description = "Web server for user authentication"))
 public class UserController {
     private UserService userService;
-    @PostMapping("/info_update")
+    @PutMapping("/info_update")
     public ResponseEntity<String> userInfoUpdate(@RequestBody User user) throws AccountNotFoundException {
         userService.updateUser(user);
         return ResponseEntity.ok("User information was updated");

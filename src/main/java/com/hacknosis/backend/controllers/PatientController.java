@@ -29,7 +29,6 @@ import java.util.Arrays;
 @AllArgsConstructor
 @RequestMapping("api/patient")
 @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
-@OpenAPIDefinition(info = @Info(title = "User API", version = "1.0", description = "Web server for patient operations"))
 public class PatientController {
     private PatientService patientService;
     @PostMapping(value = "/report/image/upload")
@@ -52,7 +51,7 @@ public class PatientController {
         return ResponseEntity.ok("Report is being analyzed");
     }
 
-    @PostMapping(value = "/info_update")
+    @PutMapping(value = "/info_update")
     public ResponseEntity<String> updatePatientInformation(@RequestBody @Valid Patient patient) throws AccountNotFoundException {
         patientService.updatePatient(patient);
         return ResponseEntity.ok("Patient information has been updated");

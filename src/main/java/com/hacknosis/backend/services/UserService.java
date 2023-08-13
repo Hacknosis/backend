@@ -5,6 +5,7 @@ import com.hacknosis.backend.exceptions.AccountInfoConflictException;
 import com.hacknosis.backend.exceptions.AuthenticationException;
 import com.hacknosis.backend.models.Patient;
 import com.hacknosis.backend.models.User;
+import com.hacknosis.backend.repositories.PatientRepository;
 import com.hacknosis.backend.repositories.UserRepository;
 import com.hacknosis.backend.utils.JwtTokenUtil;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ import javax.security.auth.login.AccountNotFoundException;
 @AllArgsConstructor
 public class UserService {
     private UserRepository userRepository;
+    private PatientRepository patientRepository;
     private JwtTokenUtil jwtTokenUtil;
     private AuthenticationManager authenticationManager;
     public String authenticate(JwtRequest authenticationRequest) {
@@ -54,9 +56,13 @@ public class UserService {
     public void addPatient(Patient patient, String username) throws AccountNotFoundException {
         if (!usernameExist(username)) {
             throw new AccountNotFoundException(String.format("Account with username %s does not exist", username));
+        } else if (patientRepository.existsById(patient.getId())) {
+            throw new AccountInfoConflictException(String.format("Patient with id - %d is already patient of this doctor", patient.getId()));
         }
         User doctor = userRepository.findUserByUsername(username).get();
         doctor.getPatients().add(patient);
+        patient.setUser(doctor);
+        patientRepository.save(patient);
         userRepository.save(doctor);
     }
 }
