@@ -20,7 +20,6 @@ import javax.validation.Valid;
 @AllArgsConstructor
 @RequestMapping("api/auth")
 @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
-@OpenAPIDefinition(info = @Info(title = "User API", version = "1.0", description = "Web server for user authentication"))
 public class AuthController {
     private final UserService userService;
 
