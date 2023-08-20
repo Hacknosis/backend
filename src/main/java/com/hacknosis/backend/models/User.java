@@ -38,6 +38,9 @@ public class User {
     @Email(message = "Bad Email format")
     private String email;
 
+    @NotNull(message = "Extension cannot be null")
+    private String extension;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Patient> patients = new ArrayList<>();
 

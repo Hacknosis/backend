@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.hacknosis.backend.models.Indicator;
 import com.hacknosis.backend.models.Patient;
 import com.hacknosis.backend.models.ResusStatus;
+import com.hacknosis.backend.models.TestReport;
 import com.hacknosis.backend.services.PatientService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,6 +24,7 @@ import javax.security.auth.login.AccountNotFoundException;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 @Log4j2
 @RestController
@@ -31,17 +33,17 @@ import java.util.Arrays;
 @CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class PatientController {
     private PatientService patientService;
-    @PostMapping(value = "/report/image/upload")
+    @PostMapping(value = "/report/image/upload", consumes = {"multipart/form-data"})
     public ResponseEntity<String> uploadImageReport(
             @Parameter(
-                    description = "Report to be uploaded",
-                    content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
+                description = "Report to be uploaded",
+                content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
             )
             @RequestPart(value = "report") MultipartFile imageReport, Authentication authentication)
             throws IOException, AccountNotFoundException {
 
-        patientService.processImageReport(imageReport, authentication.getName());
-        return ResponseEntity.ok("Report is being analyzed");
+        String result = patientService.processImageReport(imageReport, authentication.getName());
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping(value = "/report/textual/upload")
@@ -49,6 +51,12 @@ public class PatientController {
             throws AccountNotFoundException {
         patientService.processTextualReport(textualReport, authentication.getName());
         return ResponseEntity.ok("Report is being analyzed");
+    }
+
+    @GetMapping(value = "/report/read/{patient_id}")
+    public ResponseEntity<List<TestReport>> readReport(@PathVariable("patient_id") long patientId)
+            throws AccountNotFoundException {
+        return ResponseEntity.ok(patientService.readTestReport(patientId));
     }
 
     @PutMapping(value = "/info_update")

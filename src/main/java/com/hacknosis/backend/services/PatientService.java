@@ -10,11 +10,16 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
@@ -22,6 +27,7 @@ import javax.security.auth.login.AccountNotFoundException;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -43,6 +49,13 @@ public class PatientService {
         patientRepository.save(patient);
     }
 
+    public List<TestReport> readTestReport(long patientId) throws AccountNotFoundException {
+        if (!patientRepository.existsById(patientId)) {
+            throw new AccountNotFoundException("The provided patient entity does not exist");
+        }
+        return testReportRepository.findTestReportByPatientId(patientId);
+    }
+
     public void upsertAppointment(Appointment appointment, long patientId, String username) throws AccountNotFoundException {
         if (!userService.usernameExist(username)) {
             throw new AccountNotFoundException("The authenticated Doctor account does not exist");
@@ -62,17 +75,26 @@ public class PatientService {
         appointmentRepository.deleteById(appointmentId);
     }
 
-    public void processImageReport(MultipartFile imageReport, String username) throws AccountNotFoundException, IOException {
+    public String processImageReport(MultipartFile imageReport, String username) throws AccountNotFoundException, IOException {
         User doctor = userService.getUser(username);
         byte[] bytes = imageReport.getBytes();
         String encodedByte = Base64.getEncoder().encodeToString(bytes);
         encodedByte = encodedByte.replaceAll("\u0000", "");
 
+        /*MultiValueMap<String, Object> formData = new LinkedMultiValueMap<>();
+        formData.add("file", new ByteArrayResource(bytes) {
+            @Override
+            public String getFilename() {
+                return imageReport.getOriginalFilename();
+            }
+        });*/
+
         WebClient client = buildClient();
         String result = client.post()
                 .uri("/report/image")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                .bodyValue(imageReport)
+                // .body(BodyInserters.fromMultipartData(formData))
+                .bodyValue(encodedByte)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, clientResponse -> {
                     throw new ReportProcessingException("Unknown error while processing the report");
@@ -81,11 +103,12 @@ public class PatientService {
                     throw new ReportProcessingException("Unknown error while processing the report");
                 })
                 .bodyToMono(String.class)
-                .timeout(Duration.ofSeconds(10000))
+                .timeout(Duration.ofSeconds(10000000))
                 .block();
 
-        TestReport report = buildTestReport(doctor, ReportType.IMAGE, result, encodedByte);
-        testReportRepository.save(report);
+        TestReport report = buildTestReport(doctor, ReportType.MRI, result, encodedByte);
+        return result;
+        // testReportRepository.save(report);
     }
 
     public void processTextualReport(String textualReport, String username) throws AccountNotFoundException {
@@ -106,16 +129,16 @@ public class PatientService {
                 .timeout(Duration.ofSeconds(10000))
                 .block();
 
-        TestReport report = buildTestReport(doctor, ReportType.IMAGE, result, textualReport);
+        TestReport report = buildTestReport(doctor, ReportType.CT, result, textualReport);
         testReportRepository.save(report);
     }
     public WebClient buildClient() {
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .responseTimeout(Duration.ofMillis(5000))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 500000000)
+                .responseTimeout(Duration.ofMillis(500000000))
                 .doOnConnected(conn ->
-                        conn.addHandlerLast(new ReadTimeoutHandler(5000, TimeUnit.MILLISECONDS))
-                                .addHandlerLast(new WriteTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
+                        conn.addHandlerLast(new ReadTimeoutHandler(500000000, TimeUnit.MILLISECONDS))
+                                .addHandlerLast(new WriteTimeoutHandler(5000000, TimeUnit.MILLISECONDS)));
 
         WebClient client = WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
