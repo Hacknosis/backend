@@ -24,9 +24,9 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@RequestBody @Valid JwtRequest authenticationRequest) {
+    public ResponseEntity<JwtResponse> login(@RequestBody @Valid JwtRequest authenticationRequest) throws AccountNotFoundException {
         String token = userService.authenticate(authenticationRequest);
-        return ResponseEntity.ok(new JwtResponse(token));
+        return ResponseEntity.ok(new JwtResponse(token, userService.getUser(authenticationRequest.getUsername())));
     }
 
     @GetMapping("/user_info")

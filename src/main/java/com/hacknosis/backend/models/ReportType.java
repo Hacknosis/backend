@@ -1,6 +1,8 @@
 package com.hacknosis.backend.models;
 
 public enum ReportType {
-    TEXTUAL,
-    IMAGE
+    MRI,
+    CT,
+    CHEST_X_RAY,
+    BLOOD_TEST
 }
