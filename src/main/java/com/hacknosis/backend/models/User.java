@@ -42,6 +42,7 @@ public class User {
     private String extension;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Patient> patients = new ArrayList<>();
 
     @JsonIgnore

@@ -42,6 +42,7 @@ public class Patient {
     private Character sex;
 
     @ElementCollection
+    @Builder.Default
     private List<String> allergies = new ArrayList<>();
 
     @NotNull(message = "Room number cannot be null")
@@ -57,5 +58,6 @@ public class Patient {
 
     @NotNull(message = "Appointments cannot be null")
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<Appointment> appointments = new ArrayList<>();
 }
