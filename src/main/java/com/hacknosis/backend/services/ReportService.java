@@ -37,12 +37,14 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@AllArgsConstructor
 public class ReportService {
-    private String awsAccessKey;
-    private String awsSecretKey;
+    private final String awsAccessKey;
+    private final String awsSecretKey;
+    @Autowired
     private PatientRepository patientRepository;
+    @Autowired
     private TestReportRepository testReportRepository;
+    @Autowired
     private UserService userService;
     @Autowired
     public ReportService(@Value("${aws_access_key}") String awsAccessKey, @Value("${aws_secret_key}") String awsSecretKey) {
