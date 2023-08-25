@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Data
@@ -42,4 +44,6 @@ public class TestReport {
 
     @NotNull(message = "Analysis result must be not null")
     private String analysisResult;
+
+    private LocalDateTime date;
 }
