@@ -28,7 +28,7 @@ public class PatientService {
         patientRepository.save(patient);
     }
 
-    public void upsertAppointment(Appointment appointment, long patientId, String username) throws AccountNotFoundException {
+    public Appointment upsertAppointment(Appointment appointment, long patientId, String username) throws AccountNotFoundException {
         if (!userService.usernameExist(username)) {
             throw new AccountNotFoundException("The authenticated Doctor account does not exist");
         } else if (!patientRepository.existsById(patientId)) {
@@ -36,7 +36,7 @@ public class PatientService {
         }
         Patient patient = patientRepository.getReferenceById(patientId);
         appointment.setPatient(patient);
-        appointmentRepository.save(appointment);
+        return appointmentRepository.save(appointment);
     }
     public void deleteAppointment(long appointmentId, String username) throws AccountNotFoundException, ResourceNotFoundException {
         if (!userService.usernameExist(username)) {
