@@ -35,15 +35,21 @@ public class TestReport {
     @Enumerated(EnumType.STRING)
     private ReportType type;
 
-    @NotNull(message = "Test data cannot be null")
-    private String testData;
-
-    @NotNull(message = "Report status cannot be null")
+    //@NotNull(message = "Report status cannot be null")
     @Enumerated(EnumType.STRING)
     private ReportStatus reportStatus;
 
-    @NotNull(message = "Analysis result must be not null")
-    private String analysisResult;
+    @Lob // Use the @Lob annotation
+    @Column(columnDefinition = "TEXT")
+    private String entityDetectionAnalysisResult;
+
+    @Lob // Use the @Lob annotation
+    @Column(columnDefinition = "TEXT")
+    private String ontologyLinkingAnalysisResult;
+
+    private String contentId;
+
+    private String publicationId;
 
     private LocalDateTime date;
 }
