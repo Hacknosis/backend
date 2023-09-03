@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,6 +41,10 @@ public class Patient {
 
     @NotNull(message = "Birth Sex must be specified")
     private Character sex;
+
+    @Email(message = "Bad Email format")
+    @NotNull(message = "Email must be specified")
+    private String email;
 
     @ElementCollection
     @Builder.Default

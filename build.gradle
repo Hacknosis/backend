@@ -36,9 +36,17 @@ dependencies {
 	implementation 'mysql:mysql-connector-java:8.0.28'
 	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
 
+	// AWS Medical API
 	implementation platform('com.amazonaws:aws-java-sdk-bom:1.12.529')
 	implementation 'com.amazonaws:aws-java-sdk-s3'
 	implementation 'com.amazonaws:aws-java-sdk-comprehendmedical:1.12.503'
+
+	// Google Gmail API
+	implementation 'com.google.api-client:google-api-client:2.0.0'
+	implementation 'com.google.auth:google-auth-library-oauth2-http:1.11.0'
+	implementation 'com.google.oauth-client:google-oauth-client-jetty:1.34.1'
+	implementation 'com.google.apis:google-api-services-gmail:v1-rev20220404-2.0.0'
+	implementation 'javax.mail:mail:1.4.7'
 
 	compileOnly 'org.projectlombok:lombok'
 

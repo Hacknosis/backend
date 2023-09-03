@@ -16,7 +16,7 @@ public class PatientService {
     private PatientRepository patientRepository;
     private UserService userService;
     private AppointmentRepository appointmentRepository;
-
+    private EmailService emailService;
     public void updatePatient(Patient patient) throws AccountNotFoundException {
         if (patientRepository.findById(patient.getId()).isEmpty()) {
             throw new AccountNotFoundException("The provided patient entity does not exist");
@@ -28,7 +28,7 @@ public class PatientService {
         patientRepository.save(patient);
     }
 
-    public Appointment upsertAppointment(Appointment appointment, long patientId, String username) throws AccountNotFoundException {
+    public Appointment upsertAppointment(Appointment appointment, long patientId, String username) throws Exception {
         if (!userService.usernameExist(username)) {
             throw new AccountNotFoundException("The authenticated Doctor account does not exist");
         } else if (!patientRepository.existsById(patientId)) {
@@ -36,6 +36,7 @@ public class PatientService {
         }
         Patient patient = patientRepository.getReferenceById(patientId);
         appointment.setPatient(patient);
+        emailService.sendAppointmentEmail(patient, appointment);
         return appointmentRepository.save(appointment);
     }
     public void deleteAppointment(long appointmentId, String username) throws AccountNotFoundException, ResourceNotFoundException {
