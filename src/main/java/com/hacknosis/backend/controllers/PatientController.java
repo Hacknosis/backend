@@ -30,7 +30,7 @@ public class PatientController {
     public ResponseEntity<Appointment> createAppointment(
             @RequestBody @Valid Appointment appointment,
             @PathVariable("patientId") long patientId,
-            Authentication authentication) throws AccountNotFoundException {
+            Authentication authentication) throws Exception {
         Appointment result = patientService.upsertAppointment(appointment, patientId, authentication.getName());
         return ResponseEntity.ok(result);
     }
@@ -38,7 +38,7 @@ public class PatientController {
     @DeleteMapping(value = "appointment/{appointmentId}")
     public ResponseEntity<String> deleteAppointment(
             @PathVariable("appointmentId") long appointmentId,
-            Authentication authentication) throws AccountNotFoundException, ResourceNotFoundException {
+            Authentication authentication) throws Exception {
         patientService.deleteAppointment(appointmentId, authentication.getName());
         return ResponseEntity.ok("Appointment deleted");
     }
