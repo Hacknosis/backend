@@ -3,6 +3,7 @@ package com.hacknosis.backend.utils;
 import com.google.api.services.gmail.model.Message;
 import com.hacknosis.backend.models.Appointment;
 import com.hacknosis.backend.models.Patient;
+import com.hacknosis.backend.models.ReportData;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -57,6 +58,52 @@ public class EmailUtil {
         content = content.replace("{provider}", appointment.getMainProvider());
         content = content.replace("{time}", appointment.getAppointmentTime().toString());
         content = content.replace("{drn}", patient.getUser().getName());
+
+        //email.setText(bodyText); // default mime type of text/plain
+        Multipart multipart = new MimeMultipart();
+
+        MimeBodyPart messageBodyPart = new MimeBodyPart();
+        messageBodyPart.setContent(content, "text/html; charset=utf-8");
+        multipart.addBodyPart(messageBodyPart);
+
+        /*
+        // Attach file
+        MimeBodyPart attachmentBodyPart = buildAttachmentFromMultipartFile(null);
+        multipart.addBodyPart(attachmentBodyPart);
+        */
+
+        // Set the Multipart object as the content of the email
+        email.setContent(multipart);
+
+        return email;
+    }
+
+    public MimeMessage createIssueEmail(ReportData reportData)
+            throws MessagingException, IOException {
+        Properties props = new Properties();
+        Session session = Session.getDefaultInstance(props, null);
+
+        MimeMessage email = new MimeMessage(session);
+
+        email.setFrom(new InternetAddress(fromEmailAddress));
+        email.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress("gracexuwt1126@gmail.com"));
+        email.setSubject("Issue Ticket");
+
+        FileReader fileReader = new FileReader("src/main/resources/email_templates/issue.html");
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+        StringBuilder htmlContent = new StringBuilder();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            htmlContent.append(line);
+        }
+        bufferedReader.close();
+        fileReader.close();
+
+        String content = htmlContent.toString();
+        content = content.replace("{img}", reportData.getScreenshotData());
+        content = content.replace("{issueDescription}", reportData.getIssueDescription());
+        content = content.replace("{timestamp}", reportData.getTimestamp());
 
         //email.setText(bodyText); // default mime type of text/plain
         Multipart multipart = new MimeMultipart();

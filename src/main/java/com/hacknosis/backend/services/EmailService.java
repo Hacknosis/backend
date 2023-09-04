@@ -17,7 +17,7 @@ import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
 import com.hacknosis.backend.models.Appointment;
 import com.hacknosis.backend.models.Patient;
-import com.hacknosis.backend.models.User;
+import com.hacknosis.backend.models.ReportData;
 import com.hacknosis.backend.utils.EmailUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,6 +61,30 @@ public class EmailService {
             }
         }
     }
+
+    public void sendIssueEmail(ReportData reportData)
+            throws Exception {
+
+        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                .setApplicationName(APPLICATION_NAME)
+                .build();
+
+        MimeMessage email = mailUtil.createIssueEmail(reportData);
+        Message message = mailUtil.createMessageWithEmail(email);
+
+        try {
+            service.users().messages().send("me", message).execute();
+        } catch (GoogleJsonResponseException e) {
+            GoogleJsonError error = e.getDetails();
+            if (error.getCode() == 403) {
+                throw new Exception("Wrong account configured in application.properties");
+            } else {
+                throw e;
+            }
+        }
+    }
+
     private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
             throws IOException {
         // Load client secrets.
