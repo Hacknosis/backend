@@ -34,12 +34,12 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 public class OpenTextService {
     private OAuth2TokenUtil oAuth2TokenUtil;
-    public String uploadDocumentToContentStorage(MultipartFile file) throws IOException {
+    public String uploadDocumentToContentStorage(byte[] fileByte, String filename) throws IOException {
         String url = "/v2/content";
         WebClient client = buildWebClient("https://css.na-1-dev.api.opentext.com");
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
-        bodyBuilder.part("name", new ByteArrayResource(file.getBytes()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "form-data; name=\"name\"; filename=\"" + file.getOriginalFilename() + "\"");
+        bodyBuilder.part("name", new ByteArrayResource(fileByte))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "form-data; name=\"name\"; filename=\"" + filename + "\"");
 
         WebClient.ResponseSpec spec = client.post()
                 .uri(url)
