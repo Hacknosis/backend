@@ -17,17 +17,16 @@ import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
 import com.hacknosis.backend.models.Appointment;
 import com.hacknosis.backend.models.Patient;
-import com.hacknosis.backend.models.ReportData;
 import com.hacknosis.backend.utils.EmailUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.internet.MimeMessage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 @Service
@@ -62,7 +61,7 @@ public class EmailService {
         }
     }
 
-    public void sendIssueEmail(ReportData reportData)
+    public void sendIssueEmail(MultipartFile screenshot, String issueDescription, String timestamp, String reporterID)
             throws Exception {
 
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -70,7 +69,7 @@ public class EmailService {
                 .setApplicationName(APPLICATION_NAME)
                 .build();
 
-        MimeMessage email = mailUtil.createIssueEmail(reportData);
+        MimeMessage email = mailUtil.createIssueEmail(screenshot, issueDescription,timestamp,reporterID);
         Message message = mailUtil.createMessageWithEmail(email);
 
         try {

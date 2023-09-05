@@ -3,16 +3,13 @@ package com.hacknosis.backend.utils;
 import com.google.api.services.gmail.model.Message;
 import com.hacknosis.backend.models.Appointment;
 import com.hacknosis.backend.models.Patient;
-import com.hacknosis.backend.models.ReportData;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
@@ -78,7 +75,7 @@ public class EmailUtil {
         return email;
     }
 
-    public MimeMessage createIssueEmail(ReportData reportData)
+    public MimeMessage createIssueEmail(MultipartFile screenshot,String issueDescription,String timestamp,String reporterID)
             throws MessagingException, IOException {
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
@@ -101,9 +98,9 @@ public class EmailUtil {
         fileReader.close();
 
         String content = htmlContent.toString();
-        content = content.replace("{img}", reportData.getScreenshotData());
-        content = content.replace("{issueDescription}", reportData.getIssueDescription());
-        content = content.replace("{timestamp}", reportData.getTimestamp());
+        content = content.replace("{issueDescription}", issueDescription);
+        content = content.replace("{timestamp}", timestamp);
+        content = content.replace("{reporterID}", reporterID);
 
         //email.setText(bodyText); // default mime type of text/plain
         Multipart multipart = new MimeMultipart();
@@ -112,11 +109,9 @@ public class EmailUtil {
         messageBodyPart.setContent(content, "text/html; charset=utf-8");
         multipart.addBodyPart(messageBodyPart);
 
-        /*
         // Attach file
-        MimeBodyPart attachmentBodyPart = buildAttachmentFromMultipartFile(null);
+        MimeBodyPart attachmentBodyPart = buildAttachmentFromMultipartFile(screenshot);
         multipart.addBodyPart(attachmentBodyPart);
-        */
 
         // Set the Multipart object as the content of the email
         email.setContent(multipart);
