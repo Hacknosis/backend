@@ -7,11 +7,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.activation.FileDataSource;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
@@ -70,6 +68,50 @@ public class EmailUtil {
         MimeBodyPart attachmentBodyPart = buildAttachmentFromMultipartFile(null);
         multipart.addBodyPart(attachmentBodyPart);
         */
+
+        // Set the Multipart object as the content of the email
+        email.setContent(multipart);
+
+        return email;
+    }
+
+    public MimeMessage createIssueEmail(MultipartFile screenshot,String issueDescription,String timestamp,String reporterID)
+            throws MessagingException, IOException {
+        Properties props = new Properties();
+        Session session = Session.getDefaultInstance(props, null);
+
+        MimeMessage email = new MimeMessage(session);
+
+        email.setFrom(new InternetAddress(fromEmailAddress));
+        email.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress("gracexuwt1126@gmail.com"));
+        email.setSubject("Issue Ticket");
+
+        FileReader fileReader = new FileReader("src/main/resources/email_templates/issue.html");
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+        StringBuilder htmlContent = new StringBuilder();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            htmlContent.append(line);
+        }
+        bufferedReader.close();
+        fileReader.close();
+
+        String content = htmlContent.toString();
+        content = content.replace("{issueDescription}", issueDescription);
+        content = content.replace("{timestamp}", timestamp);
+        content = content.replace("{reporterID}", reporterID);
+
+        //email.setText(bodyText); // default mime type of text/plain
+        Multipart multipart = new MimeMultipart();
+
+        MimeBodyPart messageBodyPart = new MimeBodyPart();
+        messageBodyPart.setContent(content, "text/html; charset=utf-8");
+        multipart.addBodyPart(messageBodyPart);
+
+        // Attach file
+        MimeBodyPart attachmentBodyPart = buildAttachmentFromMultipartFile(screenshot);
+        multipart.addBodyPart(attachmentBodyPart);
 
         // Set the Multipart object as the content of the email
         email.setContent(multipart);
