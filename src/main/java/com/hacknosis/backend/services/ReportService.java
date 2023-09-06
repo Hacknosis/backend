@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -58,7 +59,7 @@ public class ReportService {
     public String readPublication(String publicationId) throws ResourceNotFoundException {
         return openTextService.getPublication(publicationId);
     }
-    public void processReport(MultipartFile medicalReport, String username, Long patientId, boolean text) throws AccountNotFoundException, IOException {
+    public void processReport(MultipartFile medicalReport, String username, Long patientId, String reportType, String reportStatus, boolean text) throws AccountNotFoundException, IOException {
         if (!patientRepository.existsById(patientId)) {
             throw new AccountNotFoundException("The provided patient entity does not exist");
         }
@@ -71,7 +72,9 @@ public class ReportService {
             encodedByte = medicalReport.getBytes();
         } else {
             encodedByte = preprocess(medicalReport);
+            //encodedByte = medicalReport.getBytes();
         }
+        //log.info(Arrays.toString(encodedByte));
         contentId = openTextService.uploadDocumentToContentStorage(encodedByte, medicalReport.getOriginalFilename());
         log.info("Uploaded content id is: " + contentId);
 
@@ -91,8 +94,8 @@ public class ReportService {
                 .publicationId(publicationId)
                 .patient(patient)
                 .date(LocalDateTime.now())
-                .type(ReportType.CT)
-                .reportStatus(ReportStatus.AVAILABLE)
+                .type(findReportType(reportType))
+                .reportStatus(findReportStatus(reportStatus))
                 .entityDetectionAnalysisResult(jsonStringify(entityDetectionAnalysisResult))
                 .ontologyLinkingAnalysisResult(jsonStringify(ontologyAnalysisResult))
                 .build();
@@ -159,5 +162,37 @@ public class ReportService {
                 .build();
 
         return client;
+    }
+
+    private ReportType findReportType(String reportTypeString) {
+        switch (reportTypeString) {
+            case "MRI":
+                return ReportType.MRI;
+            case "CT":
+                return ReportType.CT;
+            case "CHEST_X_RAY":
+                return ReportType.CHEST_X_RAY;
+            case "BLOOD_TEST":
+                return ReportType.BLOOD_TEST;
+            case "TEXT":
+                return ReportType.TEXT;
+            default:
+                throw new IllegalArgumentException("Invalid report type: " + reportTypeString);
+        }
+    }
+
+    private ReportStatus findReportStatus(String reportStatusStr) {
+        switch (reportStatusStr) {
+            case "AVAILABLE":
+                return ReportStatus.AVAILABLE;
+            case "PROCESSING":
+                return ReportStatus.PROCESSING;
+            case "TRANSIT":
+                return ReportStatus.TRANSIT;
+            case "ORDERED":
+                return ReportStatus.ORDERED;
+            default:
+                throw new IllegalArgumentException("Invalid report status: " + reportStatusStr);
+        }
     }
 }
