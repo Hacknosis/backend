@@ -3,6 +3,7 @@ package com.hacknosis.backend.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hacknosis.backend.dto.ReportAnalysisResult;
 import com.hacknosis.backend.exceptions.ResourceNotFoundException;
+import com.hacknosis.backend.models.ReportType;
 import com.hacknosis.backend.models.TestReport;
 import com.hacknosis.backend.services.ReportService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,10 +34,13 @@ public class TestReportController {
                     description = "Report to be uploaded",
                     content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
             )
-            @RequestPart(value = "report") MultipartFile imageReport, Authentication authentication, @PathVariable(value = "patient_id") long patientId)
+            @RequestPart(value = "report") MultipartFile imageReport, @RequestPart(value="reportType") String reportType, @RequestPart(value="reportStatus") String reportStatus, Authentication authentication, @PathVariable(value = "patient_id") long patientId)
             throws IOException, AccountNotFoundException {
-
-        reportService.processReport(imageReport, authentication.getName(), patientId,false);
+        if (imageReport.getContentType() != null && imageReport.getContentType().startsWith("image/")) {
+            reportService.processReport(imageReport, authentication.getName(), patientId, reportType, reportStatus,false);
+        } else {
+            return ResponseEntity.badRequest().body("Invalid file format. Please upload an image file.");
+        }
         return ResponseEntity.ok("Report is being processed");
     }
 
@@ -46,10 +50,10 @@ public class TestReportController {
                     description = "Report to be uploaded",
                     content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
             )
-            @RequestPart(value = "report") MultipartFile textualReport, Authentication authentication, @PathVariable(value = "patient_id") long patientId)
+            @RequestPart(value = "report") MultipartFile textualReport, @RequestPart(value="reportType") String reportType, @RequestPart(value="reportStatus") String reportStatus, Authentication authentication, @PathVariable(value = "patient_id") long patientId)
             throws AccountNotFoundException, IOException {
         if (!textualReport.isEmpty() && "text/plain".equals(textualReport.getContentType())) {
-            reportService.processReport(textualReport, authentication.getName(), patientId, true);
+            reportService.processReport(textualReport, authentication.getName(), patientId, reportType,reportStatus,true);
             return ResponseEntity.ok("Report is being processed");
         } else {
             return ResponseEntity.badRequest().body("Invalid file format. Please upload a text file.");
