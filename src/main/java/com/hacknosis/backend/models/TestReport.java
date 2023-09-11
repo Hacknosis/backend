@@ -35,6 +35,10 @@ public class TestReport {
     @Enumerated(EnumType.STRING)
     private ReportType type;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String content;
+
     @Enumerated(EnumType.STRING)
     private ReportStatus reportStatus;
 

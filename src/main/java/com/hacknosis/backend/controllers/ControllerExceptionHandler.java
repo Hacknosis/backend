@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.Arrays;
@@ -139,6 +140,17 @@ public class ControllerExceptionHandler {
                 .code(HttpStatus.BAD_REQUEST.value())
                 .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .error("File size cannot exceed 50MB")
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = MissingServletRequestPartException.class)
+    protected HttpErrorResponse handleMissingServletRequestPartException(Exception ex) {
+        MissingServletRequestPartException e = (MissingServletRequestPartException) ex;
+        return HttpErrorResponse.builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .error(String.format("The required request part '%s' is missing", e.getRequestPartName()))
                 .build();
     }
 }
