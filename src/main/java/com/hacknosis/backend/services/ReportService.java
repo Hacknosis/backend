@@ -94,8 +94,8 @@ public class ReportService {
                 .publicationId(publicationId)
                 .patient(patient)
                 .date(LocalDateTime.now())
-                .type(findReportType(reportType))
-                .reportStatus(findReportStatus(reportStatus))
+                .type(ReportType.valueOf(reportType))
+                .reportStatus(ReportStatus.valueOf(reportStatus))
                 .entityDetectionAnalysisResult(jsonStringify(entityDetectionAnalysisResult))
                 .ontologyLinkingAnalysisResult(jsonStringify(ontologyAnalysisResult))
                 .build();
@@ -162,37 +162,5 @@ public class ReportService {
                 .build();
 
         return client;
-    }
-
-    private ReportType findReportType(String reportTypeString) {
-        switch (reportTypeString) {
-            case "MRI":
-                return ReportType.MRI;
-            case "CT":
-                return ReportType.CT;
-            case "CHEST_X_RAY":
-                return ReportType.CHEST_X_RAY;
-            case "BLOOD_TEST":
-                return ReportType.BLOOD_TEST;
-            case "TEXT":
-                return ReportType.TEXT;
-            default:
-                throw new IllegalArgumentException("Invalid report type: " + reportTypeString);
-        }
-    }
-
-    private ReportStatus findReportStatus(String reportStatusStr) {
-        switch (reportStatusStr) {
-            case "AVAILABLE":
-                return ReportStatus.AVAILABLE;
-            case "PROCESSING":
-                return ReportStatus.PROCESSING;
-            case "TRANSIT":
-                return ReportStatus.TRANSIT;
-            case "ORDERED":
-                return ReportStatus.ORDERED;
-            default:
-                throw new IllegalArgumentException("Invalid report status: " + reportStatusStr);
-        }
     }
 }
