@@ -74,7 +74,6 @@ public class ReportService {
             encodedByte = preprocess(medicalReport);
             //encodedByte = medicalReport.getBytes();
         }
-        //log.info(Arrays.toString(encodedByte));
         contentId = openTextService.uploadDocumentToContentStorage(encodedByte, medicalReport.getOriginalFilename());
         log.info("Uploaded content id is: " + contentId);
 
@@ -82,8 +81,9 @@ public class ReportService {
         log.info("Publication id is: " + publicationId);
 
         ReportAnalysisResult entityDetectionAnalysisResult = null, ontologyAnalysisResult = null;
+        String content = "";
         if (text) {
-            String content = new String(medicalReport.getBytes());
+            content = new String(medicalReport.getBytes());
             entityDetectionAnalysisResult = entityDetection(content);
             ontologyAnalysisResult = ontologyLinking(content);
         }
@@ -94,6 +94,7 @@ public class ReportService {
                 .publicationId(publicationId)
                 .patient(patient)
                 .date(LocalDateTime.now())
+                .content(content)
                 .type(ReportType.valueOf(reportType))
                 .reportStatus(ReportStatus.valueOf(reportStatus))
                 .entityDetectionAnalysisResult(jsonStringify(entityDetectionAnalysisResult))

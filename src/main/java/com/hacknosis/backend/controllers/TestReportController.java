@@ -36,7 +36,7 @@ public class TestReportController {
             )
             @RequestPart(value = "report") MultipartFile imageReport, @RequestPart(value="reportType") String reportType, @RequestPart(value="reportStatus") String reportStatus, Authentication authentication, @PathVariable(value = "patient_id") long patientId)
             throws IOException, AccountNotFoundException {
-        if (imageReport.getContentType() != null && imageReport.getContentType().startsWith("image/")) {
+        if (imageReport.getContentType() != null && (imageReport.getContentType().startsWith("image/") || imageReport.getContentType().startsWith("application/pdf"))) {
             reportService.processReport(imageReport, authentication.getName(), patientId, reportType, reportStatus,false);
         } else {
             return ResponseEntity.badRequest().body("Invalid file format. Please upload an image file.");
