@@ -34,7 +34,7 @@ jobs:
         run: echo "Hello from Job 1" > shared-file.txt
 
       - name: Display content
-          run: cat shared-file.txt
+        run: cat shared-file.txt
 
   build-push-artifact:
     needs: gradle-build
