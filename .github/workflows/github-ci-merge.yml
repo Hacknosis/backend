@@ -12,9 +12,9 @@ env:
   GAR_LOCATION: northamerica-northeast2-docker.pkg.dev/hacknosis/hacknosis-gar
 
 jobs:
-  gradle-build:
+  build-push-artifact:
+    needs: gradle-build
     runs-on: ubuntu-latest
-
     steps:
       - name: "Checkout Repository"
         uses: "actions/checkout@v2"
@@ -28,18 +28,8 @@ jobs:
       - name: "Execute Gradle build"
         run: |
           chmod a+x ./gradlew
-          ./gradlew build
+          ./gradlew build    
 
-      - name: Create a file
-        run: echo "Hello from Job 1" > shared-file.txt
-
-      - name: Display content
-        run: cat shared-file.txt
-
-  build-push-artifact:
-    needs: gradle-build
-    runs-on: ubuntu-latest
-    steps:
       - name: "Checkout Repository"
         uses: "actions/checkout@v3"
 
