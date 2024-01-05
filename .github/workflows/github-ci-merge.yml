@@ -18,7 +18,13 @@ jobs:
       - name: "Checkout"
         uses: "actions/checkout@v3"
 
-      - id: "auth"
+      - name: "Setup Gradle"
+        uses: "gradle/gradle-build-action@v2"
+
+      - name: "Gradle build"
+        run: ./gradlew build
+
+      - id: "Auth"
         uses: "google-github-actions/auth@v1"
         with:
           credentials_json: "${{ secrets.GCLOUD_GAR_AUTH_KEY }}"
@@ -34,8 +40,8 @@ jobs:
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build image
-        run: docker build . --file ../../Dockerfile --tag ${{ env.GAR_LOCATION }}:latest
-        working-directory: .github/workflows
+        run: docker build . --file Dockerfile --tag ${{ env.GAR_LOCATION }}:latest
+        working-directory: .
 
       - name: Push image
         run: docker push ${{ env.GAR_LOCATION }}
