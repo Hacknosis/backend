@@ -9,7 +9,7 @@ on:
 env:
   PROJECT_ID: hacknosis
   REGION: northamerica-northeast2
-  GAR_LOCATION: northamerica-northeast2-docker.pkg.dev/hacknosis/hacknosis-gar
+  GAR_LOCATION: northamerica-northeast2-docker.pkg.dev/hacknosis/hacknosis-gar/hacknosis_backend
 
 jobs:
   build-push-artifact:
