@@ -54,7 +54,7 @@ public class EmailService {
         } catch (GoogleJsonResponseException e) {
             GoogleJsonError error = e.getDetails();
             if (error.getCode() == 403) {
-                throw new Exception("Wrong account configured in application.properties");
+                throw new Exception("Wrong account configured in application-dev.properties");
             } else {
                 throw e;
             }
@@ -77,7 +77,7 @@ public class EmailService {
         } catch (GoogleJsonResponseException e) {
             GoogleJsonError error = e.getDetails();
             if (error.getCode() == 403) {
-                throw new Exception("Wrong account configured in application.properties");
+                throw new Exception("Wrong account configured in application-dev.properties");
             } else {
                 throw e;
             }
