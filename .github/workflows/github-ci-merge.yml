@@ -1,30 +1,41 @@
-name: Deploy to GCR
+name: Build and Push to Artifact Registry
 
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
-jobs:
-  build-and-push-to-gcr:
+env:
+  PROJECT_ID: hacknosis
+  REGION: northamerica-northeast2
+  GAR_LOCATION: northamerica-northeast2-docker.pkg.dev/hacknosis/hacknosis-gar/
+
+job:
+  build-push-artifact:
     runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
     steps:
-      - uses: actions/checkout@v3
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          service_account: hacknosis-server-gar-sa@hacknosis.iam.gserviceaccount.com
-          credentials_json: ${{ secrets.GCLOUD_GCR_AUTH_KEY }}
-      - uses: RafikFarhad/push-to-gcr-github-action@v5-rc1
-        with:
-          gcloud_service_key: ${{ secrets.GCLOUD_GCR_AUTH_KEY }} # can be base64 encoded or plain text || not needed if you use google-github-actions/auth
-          registry: pkg.dev
-          project_id: hacknosis
-          image_name: backend
-          image_tag: latest,v1
-          dockerfile: Dockerfile
-          context: ../../
+      - name: "Checkout"
+        uses: "actions/checkout@v3"
+
+      - id: "auth"
+          uses: "google-github-actions/auth@v1"
+          with:
+            credentials_json: "${{ secrets.GCLOUD_SERVICE_KEY }}"
+
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v1"
+
+      - name: "Use gcloud CLI"
+        run: "gcloud info"
+
+      - name: "Docker auth"
+        run: |-
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build image
+        run: docker build . --file . --tag ${{ env.GAR_LOCATION }}
+        working-directory: ../../
+
+      - name: Push image
+        run: docker push ${{ env.GAR_LOCATION }}
