@@ -22,7 +22,9 @@ jobs:
         uses: "gradle/gradle-build-action@v2"
 
       - name: "Gradle build"
-        run: ./gradlew build
+        run: |
+          chmod +x gradlew
+          ./gradlew build
 
       - id: "Auth"
         uses: "google-github-actions/auth@v1"
