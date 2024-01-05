@@ -33,6 +33,7 @@ jobs:
           ./gradlew build
 
   build-push-artifact:
+    needs: gradle-build
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout"
