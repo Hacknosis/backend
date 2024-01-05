@@ -1,0 +1,35 @@
+name: Deploy to GCR
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:latest
+        options: --entrypoint=""  # This is needed to override the default entrypoint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        run: docker info
+
+      - name: Build and push to GCR
+        run: |
+          echo "Deploying application..."
+          docker build -t pkg.dev/hacknosis/backend:latest .
+          echo $GCLOUD_GCR_AUTH_KEY > gcloud-keyfile.json
+          docker run -v $(pwd)/gcloud-keyfile.json:/gcloud-keyfile.json -e GCLOUD_GCR_AUTH_KEY=gcloud-keyfile.json google/cloud-sdk gcloud auth activate-service-account --key-file=gcloud-keyfile.json
+          cat gcloud-keyfile.json | docker login -u _json_key --password-stdin https://pkg.dev
+          echo "Pushing to GCR..."
+          docker push pkg.dev/hacknosis/backend:latest
+          echo "Application successfully pushed to GAR."
+        env:
+          GCLOUD_GCR_AUTH_KEY: ${{ secrets.GCLOUD_GCR_AUTH_KEY }}
