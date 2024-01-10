@@ -34,4 +34,9 @@ public class Appointment {
 
     @NotNull(message = "Main provider must not be null")
     private String mainProvider;
+
+    @NotNull(message = "Remote flag cannot be null")
+    private Boolean remote;
+
+    private Long meetingId;
 }

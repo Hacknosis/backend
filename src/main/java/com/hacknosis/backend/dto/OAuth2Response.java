@@ -1,7 +1,6 @@
-package com.hacknosis.backend.models;
+package com.hacknosis.backend.dto;
 
 import lombok.Data;
-import lombok.ToString;
 
 import java.util.List;
 

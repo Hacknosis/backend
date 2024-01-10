@@ -17,6 +17,7 @@ public class PatientService {
     private UserService userService;
     private AppointmentRepository appointmentRepository;
     private EmailService emailService;
+    private ZoomService zoomService;
     public void updatePatient(Patient patient) throws AccountNotFoundException {
         if (patientRepository.findById(patient.getId()).isEmpty()) {
             throw new AccountNotFoundException("The provided patient entity does not exist");
@@ -44,6 +45,10 @@ public class PatientService {
             throw new AccountNotFoundException("The authenticated Doctor account does not exist");
         } else if (!appointmentRepository.existsById(appointmentId)) {
             throw new ResourceNotFoundException(String.format("The appointment with id - %d does not exist", appointmentId));
+        }
+        Appointment appointment = appointmentRepository.getReferenceById(appointmentId);
+        if (appointment.getRemote()) {
+            zoomService.deleteMeeting(appointment);
         }
         appointmentRepository.deleteById(appointmentId);
     }

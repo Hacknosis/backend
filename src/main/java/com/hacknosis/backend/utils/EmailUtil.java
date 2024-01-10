@@ -1,9 +1,12 @@
 package com.hacknosis.backend.utils;
 
 import com.google.api.services.gmail.model.Message;
+import com.hacknosis.backend.dto.ZoomMeetingObject;
 import com.hacknosis.backend.models.Appointment;
 import com.hacknosis.backend.models.Patient;
+import com.hacknosis.backend.services.ZoomService;
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,12 +22,16 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 @Component
 public class EmailUtil {
     @Value("${email.user}")
     public String fromEmailAddress;
+
+    @Autowired
+    public ZoomService zoomService;
     private static final String confirmationIconSource = "https://w7.pngwing.com/pngs/537/407/png-transparent-verified-check-mark-confirmation-checkbox-passed-icon.png";
     public MimeMessage createConfirmationEmail(Patient patient, Appointment appointment)
             throws MessagingException, IOException {
@@ -36,6 +43,13 @@ public class EmailUtil {
         email.setFrom(new InternetAddress(fromEmailAddress));
         email.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(patient.getEmail()));
         email.setSubject("Appointment Confirmation");
+
+        ZoomMeetingObject zoomMeetingObject = null;
+        if (appointment.getRemote()) {
+            zoomMeetingObject = zoomService.createMeeting(appointment);
+            appointment.setMeetingId(zoomMeetingObject.getId());
+            // zoomService.registerPatient(patient, zoomMeetingObject.getId());
+        }
 
         FileReader fileReader = new FileReader("src/main/resources/email_templates/confirmation.html");
         BufferedReader bufferedReader = new BufferedReader(fileReader);
@@ -53,8 +67,11 @@ public class EmailUtil {
         content = content.replace("{img_src}", confirmationIconSource);
         content = content.replace("{location}", appointment.getLocation());
         content = content.replace("{provider}", appointment.getMainProvider());
-        content = content.replace("{time}", appointment.getAppointmentTime().toString());
+        content = content.replace("{time}", appointment.getAppointmentTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).concat("UTC"));
         content = content.replace("{drn}", patient.getUser().getName());
+        if (appointment.getRemote() && zoomMeetingObject != null) {
+            content = content.replace("{extra_info}", String.format("Zoom Meeting ID: %s<br>Zoom Meeting Password: hacknosis<br>Consult customer service for assistance", zoomMeetingObject.getId()));
+        }
 
         //email.setText(bodyText); // default mime type of text/plain
         Multipart multipart = new MimeMultipart();
