@@ -42,7 +42,7 @@ public class JwtTokenUtil implements Serializable {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
-    //for retrieving any information from token we will need the secret key
+    // for retrieving any information from the token, we will need the secret key
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser().setSigningKey(SIGNING_KEY)
                 .parseClaimsJws(token)
@@ -54,6 +54,7 @@ public class JwtTokenUtil implements Serializable {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }
+
 
     public String generateToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().stream()
