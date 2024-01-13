@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.security.auth.login.AccountNotFoundException;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -53,16 +54,21 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void addPatient(Patient patient, String username) throws AccountNotFoundException {
+    public void addPatient(Patient patient, String username) throws AccountNotFoundException { /*
         if (!usernameExist(username)) {
             throw new AccountNotFoundException(String.format("Account with username %s does not exist", username));
-        } else if (patientRepository.existsById(patient.getId())) {
-            throw new AccountInfoConflictException(String.format("Patient with id - %d is already patient of this doctor", patient.getId()));
         }
+        if (patientRepository.existsById(patient.getId())) {
+            throw new AccountInfoConflictException(String.format("Patient with id - %d is already patient of this doctor", patient.getId()));
+        }*/
+        System.out.println(username);
         User doctor = userRepository.findUserByUsername(username).get();
-        doctor.getPatients().add(patient);
         patient.setUser(doctor);
-        patientRepository.save(patient);
+        doctor.getPatients().add(patient);
         userRepository.save(doctor);
+    }
+
+    public List<User> getAllUsers() throws AccountNotFoundException {
+        return userRepository.findAll();
     }
 }
