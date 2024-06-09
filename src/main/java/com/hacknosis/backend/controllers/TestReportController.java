@@ -65,11 +65,11 @@ public class TestReportController {
             throws AccountNotFoundException {
         return ResponseEntity.ok(reportService.readTestReport(patientId));
     }
-    @GetMapping(value = "/publication/read/{publication_id}")
+    /*@GetMapping(value = "/publication/read/{publication_id}")
     public ResponseEntity<String> readReportPublicationResource(@PathVariable("publication_id") String publicationId)
             throws ResourceNotFoundException {
         return ResponseEntity.ok(reportService.readPublication(publicationId));
-    }
+    }*/
 
     @PostMapping(value = "/textual/entity_detection")
     public ResponseEntity<ReportAnalysisResult> entityDetection(@RequestBody String text) {

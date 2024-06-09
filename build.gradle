@@ -57,7 +57,9 @@ dependencies {
 	implementation 'javax.mail:mail:1.4.7'
 
 	// Cloud SQL
-	implementation 'org.springframework.cloud:spring-cloud-gcp-starter-sql-mysql:1.2.8.RELEASE'
+	if (project.hasProperty('spring.profiles.active') && project.property('spring.profiles.active') == 'prod') {
+		implementation 'org.springframework.cloud:spring-cloud-gcp-starter-sql-mysql:1.2.8.RELEASE'
+	}
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

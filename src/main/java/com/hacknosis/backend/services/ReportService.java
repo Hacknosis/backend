@@ -48,7 +48,7 @@ public class ReportService {
     private TestReportRepository testReportRepository;
     private UserService userService;
     private AWSMedicalService awsMedicalService;
-    private OpenTextService openTextService;
+    // private OpenTextService openTextService;
 
     public List<TestReport> readTestReport(long patientId) throws AccountNotFoundException {
         if (!patientRepository.existsById(patientId)) {
@@ -56,9 +56,9 @@ public class ReportService {
         }
         return testReportRepository.findTestReportByPatientId(patientId);
     }
-    public String readPublication(String publicationId) throws ResourceNotFoundException {
+    /*public String readPublication(String publicationId) throws ResourceNotFoundException {
         return openTextService.getPublication(publicationId);
-    }
+    }*/
     public void processReport(MultipartFile medicalReport, String username, Long patientId, String reportType, String reportStatus, boolean text) throws AccountNotFoundException, IOException {
         if (!patientRepository.existsById(patientId)) {
             throw new AccountNotFoundException("The provided patient entity does not exist");
@@ -66,7 +66,7 @@ public class ReportService {
         User doctor = userService.getUser(username);
         Patient patient = patientRepository.getReferenceById(patientId);
 
-        String contentId;
+        /*String contentId;
         byte[] encodedByte;
         if (text) {
             encodedByte = medicalReport.getBytes();
@@ -78,7 +78,7 @@ public class ReportService {
         log.info("Uploaded content id is: " + contentId);
 
         String publicationId = openTextService.publishDocument(contentId);
-        log.info("Publication id is: " + publicationId);
+        log.info("Publication id is: " + publicationId);*/
 
         ReportAnalysisResult entityDetectionAnalysisResult = null, ontologyAnalysisResult = null;
         String content = "";
@@ -90,8 +90,8 @@ public class ReportService {
 
         TestReport report = TestReport.builder()
                 .user(doctor)
-                .contentId(contentId)
-                .publicationId(publicationId)
+                /*.contentId(contentId)
+                .publicationId(publicationId)*/
                 .patient(patient)
                 .date(LocalDateTime.now())
                 .content(content)
