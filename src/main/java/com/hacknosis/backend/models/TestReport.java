@@ -50,9 +50,9 @@ public class TestReport {
     @Column(columnDefinition = "TEXT")
     private String ontologyLinkingAnalysisResult;
 
-    private String contentId;
+    // private String contentId;
 
-    private String publicationId;
+    // private String publicationId;
 
     private LocalDateTime date;
 }
