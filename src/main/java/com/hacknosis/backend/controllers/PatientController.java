@@ -17,7 +17,6 @@ import javax.validation.Valid;
 @RestController
 @AllArgsConstructor
 @RequestMapping("api/patient")
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class PatientController {
     private PatientService patientService;
 

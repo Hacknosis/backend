@@ -25,7 +25,6 @@ import java.util.List;
 @RestController
 @AllArgsConstructor
 @RequestMapping("api/report")
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class TestReportController {
     private ReportService reportService;
     @PostMapping(value = "/image/upload/{patient_id}", consumes = {"multipart/form-data"})

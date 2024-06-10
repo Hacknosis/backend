@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @AllArgsConstructor
 @RequestMapping("api/issue")
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials = "true")
 public class IssueController {
     private EmailService emailService;
     @PostMapping(value = "/report_ticket", consumes = {"multipart/form-data"})
