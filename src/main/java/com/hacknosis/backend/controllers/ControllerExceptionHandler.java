@@ -153,4 +153,15 @@ public class ControllerExceptionHandler {
                 .error(String.format("The required request part '%s' is missing", e.getRequestPartName()))
                 .build();
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = ReportProcessingException.class)
+    protected HttpErrorResponse handleReportProcessingException(Exception ex) {
+        ReportProcessingException e = (ReportProcessingException) ex;
+        return HttpErrorResponse.builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .error(e.getMessage())
+                .build();
+    }
 }

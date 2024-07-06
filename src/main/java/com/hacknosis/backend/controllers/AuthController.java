@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.security.auth.login.AccountNotFoundException;
 import javax.validation.Valid;
+import java.util.Map;
 
 @Log4j2
 @RestController
@@ -23,6 +24,12 @@ import javax.validation.Valid;
 public class AuthController {
     private final UserService userService;
     private final OAuth2TokenUtil oAuth2TokenUtil;
+
+    @PostMapping("/signup")
+    public ResponseEntity<String> signup(@RequestBody User user) {
+        userService.createUser(user);
+        return ResponseEntity.ok("Signup successful");
+    }
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody @Valid JwtRequest authenticationRequest) throws AccountNotFoundException {
         String token = userService.authenticate(authenticationRequest);

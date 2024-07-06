@@ -5,19 +5,19 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "test_reports")
-public class TestReport {
+@Table(name = "image_reports")
+public class ImageReport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -31,28 +31,18 @@ public class TestReport {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    @NotNull(message = "Report type cannot be null")
-    @Enumerated(EnumType.STRING)
-    private ReportType type;
-
-    @Lob
-    @Column(columnDefinition = "TEXT")
-    private String content;
-
     @Enumerated(EnumType.STRING)
     private ReportStatus reportStatus;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
-    private String entityDetectionAnalysisResult;
+    @NotNull(message = "Report type cannot be null")
+    @Enumerated(EnumType.STRING)
+    private ReportType reportType;
 
-    @Lob
-    @Column(columnDefinition = "TEXT")
-    private String ontologyLinkingAnalysisResult;
+    private String reportName;
 
-    // private String contentId;
+    @JsonIgnore
+    private String storageId;
 
-    // private String publicationId;
-
+    @LastModifiedDate
     private LocalDateTime date;
 }

@@ -3,7 +3,7 @@ package com.hacknosis.backend.models;
 public enum ReportType {
     MRI,
     CT,
-    CHEST_X_RAY,
+    XRAY,
     BLOOD_TEST,
     TEXT
 }

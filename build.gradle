@@ -59,6 +59,10 @@ dependencies {
 	// Cloud SQL
 	implementation 'org.springframework.cloud:spring-cloud-gcp-starter-sql-mysql:1.2.8.RELEASE'
 
+	// Cloud Storage
+	implementation 'com.google.cloud:libraries-bom:26.5.0'
+	implementation 'com.google.cloud:google-cloud-storage:2.19.0'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -37,7 +37,8 @@ public class PatientService {
         }
         Patient patient = patientRepository.getReferenceById(patientId);
         appointment.setPatient(patient);
-        emailService.sendAppointmentEmail(patient, appointment);
+        patient.getAppointments().add(appointment);
+        // emailService.sendAppointmentEmail(patient, appointment);
         return appointmentRepository.save(appointment);
     }
     public void deleteAppointment(long appointmentId, String username) throws AccountNotFoundException, ResourceNotFoundException {

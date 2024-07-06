@@ -59,7 +59,8 @@ public class Patient {
 
     @NotNull(message = "Special Indicators cannot be null")
     @ElementCollection
-    private Set<Indicator> specialIndicators;
+    @Builder.Default
+    private Set<Indicator> specialIndicators = new HashSet<>();
 
     @NotNull(message = "Appointments cannot be null")
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)

@@ -1,16 +1,11 @@
 package com.hacknosis.backend.controllers;
 
 import com.hacknosis.backend.models.Patient;
-import com.hacknosis.backend.models.TestReport;
 import com.hacknosis.backend.models.User;
-import com.hacknosis.backend.repositories.UserRepository;
 import com.hacknosis.backend.services.UserService;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Info;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.security.auth.login.AccountNotFoundException;

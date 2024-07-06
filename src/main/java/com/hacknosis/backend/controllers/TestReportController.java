@@ -1,10 +1,10 @@
 package com.hacknosis.backend.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hacknosis.backend.dto.ReportAnalysisResult;
-import com.hacknosis.backend.exceptions.ResourceNotFoundException;
+import com.hacknosis.backend.dto.ReportSegmentRequest;
+import com.hacknosis.backend.dto.ReportSegmentResponse;
 import com.hacknosis.backend.models.ReportType;
-import com.hacknosis.backend.models.TestReport;
+import com.hacknosis.backend.models.TextualReport;
 import com.hacknosis.backend.services.ReportService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.security.auth.login.AccountNotFoundException;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -33,14 +32,22 @@ public class TestReportController {
                     description = "Report to be uploaded",
                     content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
             )
-            @RequestPart(value = "report") MultipartFile imageReport, @RequestPart(value="reportType") String reportType, @RequestPart(value="reportStatus") String reportStatus, Authentication authentication, @PathVariable(value = "patient_id") long patientId)
+            @RequestPart(value = "report") MultipartFile imageReport,
+            @RequestPart(value="reportType") String reportType,
+            Authentication authentication,
+            @PathVariable(value = "patient_id") long patientId)
             throws IOException, AccountNotFoundException {
         if (imageReport.getContentType() != null && (imageReport.getContentType().startsWith("image/") || imageReport.getContentType().startsWith("application/pdf"))) {
-            reportService.processReport(imageReport, authentication.getName(), patientId, reportType, reportStatus,false);
+            reportService.processReport(imageReport, authentication.getName(), patientId, ReportType.valueOf(reportType));
         } else {
             return ResponseEntity.badRequest().body("Invalid file format. Please upload an image file.");
         }
         return ResponseEntity.ok("Report is being processed");
+    }
+
+    @PostMapping(value = "/image/segment/{report_id}")
+    public ResponseEntity<ReportSegmentResponse> segmentImageReport(@PathVariable(value = "report_id") long reportId, @RequestBody ReportSegmentRequest request) throws IOException {
+        return ResponseEntity.ok(reportService.segmentImageReport(reportId, request.getBox()));
     }
 
     @PostMapping(value = "/textual/upload/{patient_id}")
@@ -49,10 +56,10 @@ public class TestReportController {
                     description = "Report to be uploaded",
                     content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE)
             )
-            @RequestPart(value = "report") MultipartFile textualReport, @RequestPart(value="reportType") String reportType, @RequestPart(value="reportStatus") String reportStatus, Authentication authentication, @PathVariable(value = "patient_id") long patientId)
+            @RequestPart(value = "report") MultipartFile textualReport, Authentication authentication, @PathVariable(value = "patient_id") long patientId)
             throws AccountNotFoundException, IOException {
         if (!textualReport.isEmpty() && "text/plain".equals(textualReport.getContentType())) {
-            reportService.processReport(textualReport, authentication.getName(), patientId, reportType,reportStatus,true);
+            reportService.processReport(textualReport, authentication.getName(), patientId, ReportType.TEXT);
             return ResponseEntity.ok("Report is being processed");
         } else {
             return ResponseEntity.badRequest().body("Invalid file format. Please upload a text file.");
@@ -60,23 +67,8 @@ public class TestReportController {
     }
 
     @GetMapping(value = "/patient_report/read/{patient_id}")
-    public ResponseEntity<List<TestReport>> readReport(@PathVariable("patient_id") long patientId)
+    public ResponseEntity<List<TextualReport>> readReport(@PathVariable("patient_id") long patientId)
             throws AccountNotFoundException {
-        return ResponseEntity.ok(reportService.readTestReport(patientId));
-    }
-    /*@GetMapping(value = "/publication/read/{publication_id}")
-    public ResponseEntity<String> readReportPublicationResource(@PathVariable("publication_id") String publicationId)
-            throws ResourceNotFoundException {
-        return ResponseEntity.ok(reportService.readPublication(publicationId));
-    }*/
-
-    @PostMapping(value = "/textual/entity_detection")
-    public ResponseEntity<ReportAnalysisResult> entityDetection(@RequestBody String text) {
-        return ResponseEntity.ok(reportService.entityDetection(text));
-    }
-
-    @PostMapping(value = "/textual/ontology_linking")
-    public ResponseEntity<ReportAnalysisResult> OntologyLinking(@RequestBody String text) {
-        return ResponseEntity.ok(reportService.ontologyLinking(text));
+        return ResponseEntity.ok(reportService.readTextualReport(patientId));
     }
 }

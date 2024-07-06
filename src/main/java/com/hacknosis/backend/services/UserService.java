@@ -65,10 +65,19 @@ public class UserService {
         User doctor = userRepository.findUserByUsername(username).get();
         patient.setUser(doctor);
         doctor.getPatients().add(patient);
-        userRepository.save(doctor);
+        userRepository.saveAndFlush(doctor);
     }
 
     public List<User> getAllUsers() throws AccountNotFoundException {
         return userRepository.findAll();
+    }
+
+    public void createUser(User user) {
+        if (userRepository.findUserByEmail(user.getEmail()).isPresent()) {
+            throw new AccountInfoConflictException(String.format("User with email %s already exists", user.getEmail()));
+        } else if (userRepository.findUserByUsername(user.getUsername()).isPresent()) {
+            throw new AccountInfoConflictException(String.format("User with username %s already exists", user.getUsername()));
+        }
+        userRepository.save(user);
     }
 }

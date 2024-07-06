@@ -32,6 +32,7 @@ public class User {
     private String username;
 
     @NotNull(message = "Password cannot be null")
+    @JsonIgnore
     private String password;
 
     @NotNull(message = "Email cannot be null")
