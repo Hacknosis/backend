@@ -3,10 +3,6 @@ package com.hacknosis.backend.services;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.services.storage.Storage;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.StorageOptions;
 import com.hacknosis.backend.dto.ReportAnalysisResult;
 import com.hacknosis.backend.dto.ReportSegmentResponse;
 import com.hacknosis.backend.exceptions.ReportProcessingException;
@@ -22,24 +18,16 @@ import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
-import reactor.util.retry.Retry;
 
 import javax.security.auth.login.AccountNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -47,7 +35,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -65,6 +52,22 @@ public class ReportService {
             throw new AccountNotFoundException("The provided patient entity does not exist");
         }
         return textualReportRepository.findTextualReportByPatientId(patientId);
+    }
+
+    public List<ImageReport> readImageReport(long patientId) throws AccountNotFoundException {
+        if (!patientRepository.existsById(patientId)) {
+            throw new AccountNotFoundException("The provided patient entity does not exist");
+        }
+        List<ImageReport> reports = imageReportRepository.findImageReportByPatientId(patientId);
+        reports.forEach(report -> report.setContent(storageUtil.readContent(report.getStorageId())));
+        return reports;
+    }
+
+    public byte[] getImageReportContent(long reportId) throws ResourceNotFoundException, IOException {
+        if (imageReportRepository.findById(reportId).isEmpty()) {
+            throw new ResourceNotFoundException(String.format("The provided report with id %s does not exist", reportId));
+        }
+        return storageUtil.readContent(imageReportRepository.getReferenceById(reportId).getStorageId());
     }
 
     public void processReport(MultipartFile medicalReport, String username, Long patientId, ReportType reportType) throws AccountNotFoundException, IOException {
@@ -184,30 +187,6 @@ public class ReportService {
             log.error(e);
             throw new ReportProcessingException("Failed to generate segmentation");
         }
-        /*String url = "/report/segment_image";
-        WebClient client = buildWebClient("http://localhost:8000/api");
-
-        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
-        bodyBuilder.part("report", new ByteArrayResource(report))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "form-data; name=\"report\"; filename=\"" + imageReport.getReportName() + "\"");
-        bodyBuilder.part("box", Arrays.toString(box), MediaType.TEXT_PLAIN);
-
-        log.info("Generating segmentation with bounding box {}", Arrays.toString(box));
-
-        try {
-            return client.post()
-                    .uri(url)
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .timeout(Duration.ofMillis(Integer.MAX_VALUE))
-                    .retryWhen(Retry.backoff(1, Duration.ofSeconds(5)).filter(throwable -> throwable instanceof Exception))
-                    .block();
-        } catch (Exception e) {
-            log.error(e);
-            throw new ReportProcessingException("Failed to generate segmentation");
-        }*/
     }
     static class AISegmentResponse {
         @JsonProperty("encodedBytes")

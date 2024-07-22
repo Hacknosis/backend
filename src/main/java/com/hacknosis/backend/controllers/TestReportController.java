@@ -3,6 +3,7 @@ package com.hacknosis.backend.controllers;
 import com.hacknosis.backend.dto.ReportAnalysisResult;
 import com.hacknosis.backend.dto.ReportSegmentRequest;
 import com.hacknosis.backend.dto.ReportSegmentResponse;
+import com.hacknosis.backend.models.ImageReport;
 import com.hacknosis.backend.models.ReportType;
 import com.hacknosis.backend.models.TextualReport;
 import com.hacknosis.backend.services.ReportService;
@@ -46,7 +47,8 @@ public class TestReportController {
     }
 
     @PostMapping(value = "/image/segment/{report_id}")
-    public ResponseEntity<ReportSegmentResponse> segmentImageReport(@PathVariable(value = "report_id") long reportId, @RequestBody ReportSegmentRequest request) throws IOException {
+    public ResponseEntity<ReportSegmentResponse> segmentImageReport(@PathVariable(value = "report_id") long reportId,
+                                                                    @RequestBody ReportSegmentRequest request) throws IOException {
         return ResponseEntity.ok(reportService.segmentImageReport(reportId, request.getBox()));
     }
 
@@ -66,9 +68,15 @@ public class TestReportController {
         }
     }
 
-    @GetMapping(value = "/patient_report/read/{patient_id}")
-    public ResponseEntity<List<TextualReport>> readReport(@PathVariable("patient_id") long patientId)
+    @GetMapping(value = "/textual/read/{patient_id}")
+    public ResponseEntity<List<TextualReport>> readTextualReports(@PathVariable("patient_id") long patientId)
             throws AccountNotFoundException {
         return ResponseEntity.ok(reportService.readTextualReport(patientId));
+    }
+
+    @GetMapping(value = "/image/read/{patient_id}")
+    public ResponseEntity<List<ImageReport>> readImageReports(@PathVariable("patient_id") long patientId)
+            throws AccountNotFoundException {
+        return ResponseEntity.ok(reportService.readImageReport(patientId));
     }
 }

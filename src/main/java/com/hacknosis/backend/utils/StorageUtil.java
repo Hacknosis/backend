@@ -37,8 +37,12 @@ public class StorageUtil {
         }
     }
 
-    public byte[] readContent(String storageId) throws IOException {
+    public byte[] readContent(String storageId) {
         BlobId blobId = BlobId.of(BUCKET_NAME, storageId);
-        return storage.readAllBytes(blobId);
+        try {
+            return storage.readAllBytes(blobId);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

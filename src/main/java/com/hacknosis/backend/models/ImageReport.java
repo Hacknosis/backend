@@ -40,6 +40,8 @@ public class ImageReport {
 
     private String reportName;
 
+    private byte[] content;
+
     @JsonIgnore
     private String storageId;
 
